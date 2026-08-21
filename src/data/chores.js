@@ -55,6 +55,17 @@ export const MASTER_QUESTS = [
     ruleNote: 'Mondays, Tuesdays, Thursdays & Sundays'
   },
   {
+    id: 'trash_thursday',
+    title: 'Trash Trooper: Street Drop-off',
+    description: 'Gather all household trash cans and take the main trash bin out to the street.',
+    category: 'EVENING',
+    xp: 200,
+    icon: 'Trash2',
+    days: [4], // Thursday (4)
+    timeWindow: 'Thursday Evening',
+    ruleNote: 'Every Thursday evening'
+  },
+  {
     id: 'bedtime_shower',
     title: 'Hygiene Hero: Power Shower',
     description: 'Take a full shower and clean up before crawling into bed.',
@@ -82,17 +93,6 @@ export const DAYS_OF_WEEK = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 ];
 
-/**
- * Filter quests active on a given day (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
- */
 export function getActiveQuestsForDay(dayIndex) {
   return MASTER_QUESTS.filter(quest => quest.days.includes(dayIndex));
-}
-
-/**
- * Check if a specific quest is scheduled for today
- */
-export function isQuestScheduled(questId, dayIndex) {
-  const quest = MASTER_QUESTS.find(q => q.id === questId);
-  return quest ? quest.days.includes(dayIndex) : false;
 }

@@ -83,6 +83,17 @@
           iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>'
         },
         {
+          id: 'trash_thursday',
+          title: 'Trash Trooper: Street Drop-off',
+          description: 'Gather all household trash cans and take the main trash bin out to the street.',
+          category: 'EVENING',
+          xp: 200,
+          days: [4], // Thursday (4)
+          timeWindow: 'Thursday Evening',
+          ruleNote: 'Every Thursday evening',
+          iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
+        },
+        {
           id: 'bedtime_shower',
           title: 'Hygiene Hero: Power Shower',
           description: 'Take a full shower and clean up before crawling into bed.',
@@ -141,15 +152,18 @@
         xp: Number(localStorage.getItem('hudson_xp') || 0),
         streak: Number(localStorage.getItem('hudson_streak') || 1),
         completedMap: JSON.parse(localStorage.getItem('hudson_completed') || '{}'),
+        customQuestsMap: JSON.parse(localStorage.getItem('hudson_custom_quests') || '{}'),
         selectedDayIndex: new Date().getDay(),
         soundEnabled: true,
-        showSmsModal: false
+        showSmsModal: false,
+        showAddQuestModal: false
       };
 
       function saveState() {
         localStorage.setItem('hudson_xp', state.xp);
         localStorage.setItem('hudson_streak', state.streak);
         localStorage.setItem('hudson_completed', JSON.stringify(state.completedMap));
+        localStorage.setItem('hudson_custom_quests', JSON.stringify(state.customQuestsMap));
       }
 
       function getTodayKey() {
@@ -184,7 +198,12 @@
         const root = document.getElementById('root');
         const todayKey = getTodayKey();
         const completedToday = state.completedMap[todayKey] || [];
-        const activeQuests = MASTER_QUESTS.filter(q => q.days.includes(state.selectedDayIndex));
+        const customQuestsToday = state.customQuestsMap[todayKey] || [];
+
+        // Master scheduled quests + Custom One-off quests for today
+        const scheduledQuests = MASTER_QUESTS.filter(q => q.days.includes(state.selectedDayIndex));
+        const activeQuests = [...scheduledQuests, ...customQuestsToday];
+
         const levelInfo = calculateLevel(state.xp);
         const completedCount = activeQuests.filter(q => completedToday.includes(q.id)).length;
         const totalCount = activeQuests.length;
@@ -198,7 +217,7 @@
             
             <!-- HEADER HUD -->
             <header class="relative bg-slate-900 border-4 border-yellow-400 rounded-2xl p-6 shadow-[8px_8px_0px_0px_rgba(250,204,21,1)] mb-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem;">
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem;">
                 
                 <div style="display: flex; align-items: center; gap: 1rem;">
                   <div style="width: 5rem; height: 5rem; border-radius: 1rem; background: linear-gradient(to top right, #eab308, #f59e0b, #ef4444); border: 4px solid #000; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative;">
@@ -232,8 +251,8 @@
                   </div>
                 </div>
 
-                <!-- CONTROLS & DAY SIMULATOR -->
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <!-- CONTROLS, DAY SIMULATOR & ADD CUSTOM QUEST -->
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                   <div class="bg-slate-950 px-3 py-2 rounded-xl border border-yellow-500/40 text-xs font-bold text-yellow-300">
                     <select id="daySelect" class="bg-transparent text-yellow-300 font-bold focus:outline-none cursor-pointer">
                       ${DAYS_OF_WEEK.map((name, i) => `
@@ -243,6 +262,10 @@
                       `).join('')}
                     </select>
                   </div>
+
+                  <button id="addQuestBtn" class="px-3.5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-xs rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    ➕ ADD ONE-OFF QUEST (PARENTS)
+                  </button>
 
                   <button id="soundBtn" class="p-2.5 bg-slate-800 border-2 border-yellow-400 text-yellow-400 rounded-xl font-bold">
                     ${state.soundEnabled ? '🔊' : '🔇'}
@@ -273,11 +296,14 @@
             <div class="space-y-4">
               ${activeQuests.map(quest => {
                 const isDone = completedToday.includes(quest.id);
+                const isCustom = Boolean(quest.isCustom);
+                const iconSvg = quest.iconSvg || '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>';
+
                 return `
                   <div class="p-5 rounded-2xl border-4 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isDone ? 'bg-slate-900/90 border-emerald-400 shadow-[4px_4px_0px_0px_rgba(16,185,129,1)]' : 'bg-slate-900 border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'}">
                     <div style="display: flex; align-items: flex-start; gap: 0.875rem;">
-                      <div class="p-3 rounded-xl border-2 border-black ${isDone ? 'bg-emerald-400 text-black' : 'bg-yellow-400 text-black'}">
-                        ${quest.iconSvg}
+                      <div class="p-3 rounded-xl border-2 border-black ${isDone ? 'bg-emerald-400 text-black' : isCustom ? 'bg-purple-500 text-white' : 'bg-yellow-400 text-black'}">
+                        ${iconSvg}
                       </div>
                       <div>
                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
@@ -287,6 +313,11 @@
                           <span class="bg-yellow-400 text-black font-black text-xs px-2 py-0.5 rounded-full border border-black">
                             +${quest.xp} XP
                           </span>
+                          ${isCustom ? `
+                            <span class="bg-purple-600 text-white font-black text-xs px-2 py-0.5 rounded-full border border-black">
+                              ⭐ SPECIAL ONE-OFF QUEST
+                            </span>
+                          ` : ''}
                           ${quest.deviceWarning ? `
                             <span class="bg-red-600 text-white font-black text-xs px-2 py-0.5 rounded-full border border-black">
                               🔒 NO DEVICES UNTIL DONE!
@@ -302,13 +333,52 @@
                       </div>
                     </div>
 
-                    <button data-quest="${quest.id}" data-xp="${quest.xp}" class="toggleBtn px-5 py-3 rounded-xl font-black text-xs border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] ${isDone ? 'bg-emerald-500 text-black' : 'bg-yellow-400 text-black hover:bg-yellow-300'}">
-                      ${isDone ? '✅ COMPLETED' : `CHECK OFF (+${quest.xp} XP)`}
-                    </button>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <button data-quest="${quest.id}" data-xp="${quest.xp}" class="toggleBtn px-5 py-3 rounded-xl font-black text-xs border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] ${isDone ? 'bg-emerald-500 text-black' : 'bg-yellow-400 text-black hover:bg-yellow-300'}">
+                        ${isDone ? '✅ COMPLETED' : `CHECK OFF (+${quest.xp} XP)`}
+                      </button>
+
+                      ${isCustom ? `
+                        <button data-delete-custom="${quest.id}" class="deleteCustomBtn p-3 bg-red-950 text-red-400 border border-red-500 hover:bg-red-900 rounded-xl font-bold text-xs" title="Delete One-off Quest">
+                          🗑️
+                        </button>
+                      ` : ''}
+                    </div>
                   </div>
                 `;
               }).join('')}
             </div>
+
+            <!-- ADD CUSTOM QUEST MODAL (PARENTS) -->
+            ${state.showAddQuestModal ? `
+              <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 50;">
+                <div class="bg-slate-900 border-4 border-emerald-400 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-[10px_10px_0px_0px_rgba(16,185,129,1)]">
+                  <h3 class="text-2xl font-black text-emerald-400 text-center uppercase">➕ ADD ONE-OFF QUEST (FOR HUDSON)</h3>
+                  <p class="text-xs text-slate-300 text-center">Add a custom item for Hudson to complete just for today!</p>
+                  
+                  <div class="space-y-3 text-xs text-left">
+                    <div>
+                      <label class="block text-slate-200 font-bold mb-1">Quest Title:</label>
+                      <input id="customTitle" type="text" placeholder="e.g. Clean up living room toys" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white font-bold" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-200 font-bold mb-1">Description / Instructions:</label>
+                      <input id="customDesc" type="text" placeholder="e.g. Put shoes in closet and stack books on desk" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-200 font-bold mb-1">XP Reward:</label>
+                      <input id="customXp" type="number" value="150" min="50" max="1000" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white font-bold" />
+                    </div>
+                  </div>
+
+                  <button id="saveCustomQuestBtn" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    CREATE ONE-OFF QUEST
+                  </button>
+
+                  <button id="closeCustomModalBtn" class="block w-full text-xs text-slate-400 underline text-center">Cancel</button>
+                </div>
+              </div>
+            ` : ''}
 
             <!-- SMS MODAL -->
             ${state.showSmsModal ? `
@@ -345,6 +415,58 @@
           });
         }
 
+        const addQuestBtn = document.getElementById('addQuestBtn');
+        if (addQuestBtn) {
+          addQuestBtn.addEventListener('click', () => {
+            state.showAddQuestModal = true;
+            render();
+          });
+        }
+
+        const closeCustomModalBtn = document.getElementById('closeCustomModalBtn');
+        if (closeCustomModalBtn) {
+          closeCustomModalBtn.addEventListener('click', () => {
+            state.showAddQuestModal = false;
+            render();
+          });
+        }
+
+        const saveCustomQuestBtn = document.getElementById('saveCustomQuestBtn');
+        if (saveCustomQuestBtn) {
+          saveCustomQuestBtn.addEventListener('click', () => {
+            const titleInput = document.getElementById('customTitle');
+            const descInput = document.getElementById('customDesc');
+            const xpInput = document.getElementById('customXp');
+
+            const title = titleInput ? titleInput.value.trim() : '';
+            const description = descInput ? descInput.value.trim() : 'One-off chore assigned by Mom/Dad.';
+            const xpVal = xpInput ? Number(xpInput.value) || 150 : 150;
+
+            if (!title) {
+              alert('Please enter a quest title!');
+              return;
+            }
+
+            const newQuest = {
+              id: 'custom_' + Date.now(),
+              title: title,
+              description: description,
+              xp: xpVal,
+              isCustom: true,
+              category: 'EVENING',
+              ruleNote: 'One-off special quest for today'
+            };
+
+            const todayKey = getTodayKey();
+            const currentCustom = state.customQuestsMap[todayKey] || [];
+            state.customQuestsMap[todayKey] = [...currentCustom, newQuest];
+            state.showAddQuestModal = false;
+
+            saveState();
+            render();
+          });
+        }
+
         const smsModalBtn = document.getElementById('smsModalBtn');
         if (smsModalBtn) {
           smsModalBtn.addEventListener('click', () => {
@@ -368,6 +490,22 @@
             render();
           });
         }
+
+        document.querySelectorAll('.deleteCustomBtn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const questId = e.currentTarget.getAttribute('data-delete-custom');
+            const todayKey = getTodayKey();
+            const currentCustom = state.customQuestsMap[todayKey] || [];
+            state.customQuestsMap[todayKey] = currentCustom.filter(q => q.id !== questId);
+            
+            // Also remove from completed if checked
+            const completedToday = state.completedMap[todayKey] || [];
+            state.completedMap[todayKey] = completedToday.filter(id => id !== questId);
+
+            saveState();
+            render();
+          });
+        });
 
         document.querySelectorAll('.toggleBtn').forEach(btn => {
           btn.addEventListener('click', (e) => {
