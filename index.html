@@ -88,7 +88,7 @@
           description: 'Gather all household trash cans and take the main trash bin out to the street.',
           category: 'EVENING',
           xp: 200,
-          days: [4], // Thursday (4)
+          days: [4],
           timeWindow: 'Thursday Evening',
           ruleNote: 'Every Thursday evening',
           iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
@@ -281,7 +281,7 @@
 
             <!-- MISSION PROGRESS BANNER -->
             <div class="bg-slate-900 border-4 border-yellow-400 p-5 rounded-2xl shadow-[6px_6px_0px_0px_rgba(250,204,21,1)] mb-8">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <div style="display: flex; justify-between; align-items: center; margin-bottom: 0.5rem;">
                 <h2 class="text-xl font-black text-white uppercase">TODAY'S MISSION DIRECTIVE</h2>
                 <span class="bg-yellow-400 text-black px-3 py-1 rounded-full font-black text-xs border border-black">
                   ${completedCount} / ${totalCount} QUESTS CLEAR (${percent}%)
@@ -327,7 +327,7 @@
                         <p class="text-slate-300 text-xs mt-1">${quest.description}</p>
                         ${quest.id === 'tuba_practice' ? `
                           <div class="mt-2 text-xs font-black text-amber-400 bg-slate-950 p-2 rounded-lg border border-yellow-500/40">
-                            ⏰ Sullivan Bedtime Deadline (7:30 PM): <span class="text-white underline">${getTimeLeftString()}</span>
+                            ⏰ Sullivan Bedtime Deadline (7:30 PM): <span id="tubaCountdown" class="text-white underline">${getTimeLeftString()}</span>
                           </div>
                         ` : ''}
                       </div>
@@ -359,15 +359,15 @@
                   <div class="space-y-3 text-xs text-left">
                     <div>
                       <label class="block text-slate-200 font-bold mb-1">Quest Title:</label>
-                      <input id="customTitle" type="text" placeholder="e.g. Clean up living room toys" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white font-bold" />
+                      <input id="customTitle" type="text" placeholder="e.g. Clean up living room toys" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white font-bold focus:outline-none focus:border-emerald-400" />
                     </div>
                     <div>
                       <label class="block text-slate-200 font-bold mb-1">Description / Instructions:</label>
-                      <input id="customDesc" type="text" placeholder="e.g. Put shoes in closet and stack books on desk" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white" />
+                      <input id="customDesc" type="text" placeholder="e.g. Put shoes in closet and stack books on desk" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400" />
                     </div>
                     <div>
                       <label class="block text-slate-200 font-bold mb-1">XP Reward:</label>
-                      <input id="customXp" type="number" value="150" min="50" max="1000" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white font-bold" />
+                      <input id="customXp" type="number" value="150" min="50" max="1000" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white font-bold focus:outline-none focus:border-emerald-400" />
                     </div>
                   </div>
 
@@ -420,6 +420,11 @@
           addQuestBtn.addEventListener('click', () => {
             state.showAddQuestModal = true;
             render();
+            // Auto focus title input once rendered
+            setTimeout(() => {
+              const el = document.getElementById('customTitle');
+              if (el) el.focus();
+            }, 50);
           });
         }
 
@@ -498,7 +503,6 @@
             const currentCustom = state.customQuestsMap[todayKey] || [];
             state.customQuestsMap[todayKey] = currentCustom.filter(q => q.id !== questId);
             
-            // Also remove from completed if checked
             const completedToday = state.completedMap[todayKey] || [];
             state.completedMap[todayKey] = completedToday.filter(id => id !== questId);
 
@@ -530,9 +534,16 @@
         });
       }
 
-      // Initial Render & Timer Interval
+      // Initial Render
       render();
-      setInterval(render, 1000);
+
+      // Update ONLY countdown timer element on interval (never wipe root.innerHTML while modal or input is active!)
+      setInterval(() => {
+        const tubaCountdown = document.getElementById('tubaCountdown');
+        if (tubaCountdown) {
+          tubaCountdown.innerText = getTimeLeftString();
+        }
+      }, 1000);
     })();
   </script>
 </body>
