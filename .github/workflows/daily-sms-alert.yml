@@ -1,0 +1,21 @@
+name: Daily Evening SMS Alert to Dad (919-961-8875)
+
+on:
+  schedule:
+    # 7:00 PM EST daily (23:00 UTC)
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  send-sms-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Twilio SMS Alert to Dad
+        if: ${{ secrets.TWILIO_ACCOUNT_SID != '' && secrets.TWILIO_AUTH_TOKEN != '' && secrets.TWILIO_FROM_NUMBER != '' }}
+        run: |
+          echo "Sending automated evening chore status alert to Dad at 919-961-8875..."
+          curl -X POST "https://api.twilio.com/2010-04-01/Accounts/${{ secrets.TWILIO_ACCOUNT_SID }}/Messages.json" \
+            --data-urlencode "To=+19199618875" \
+            --data-urlencode "From=${{ secrets.TWILIO_FROM_NUMBER }}" \
+            --data-urlencode "Body=⚡ Hudson Quest Reminder (7:00 PM): Evening chore checklist check! Tuba practice (Mon/Tue/Thu/Sun) deadline is 7:30 PM (Sullivan bedtime), and bedtime shower + teeth brush remaining!" \
+            -u "${{ secrets.TWILIO_ACCOUNT_SID }}:${{ secrets.TWILIO_AUTH_TOKEN }}"
