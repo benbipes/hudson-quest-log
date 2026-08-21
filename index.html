@@ -1,84 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hudson's Household Quest Log 🎮</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>" />
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              manga: {
-                gold: '#facc15',
-                cyan: '#22d3ee',
-                red: '#ef4444',
-                dark: '#020617'
-              }
-            }
-          }
-        }
-      }
-    </script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hudson's Household Quest Log 🎮</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #020617;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, .manga-title {
+      font-family: 'Bangers', 'Outfit', sans-serif;
+      letter-spacing: 0.05em;
+    }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #090d16; }
+    ::-webkit-scrollbar-thumb { background: #facc15; border-radius: 5px; border: 2px solid #000; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div id="root"></div>
 
-    <!-- React 18, ReactDOM 18, Babel Standalone & Canvas Confetti CDN -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
-
-    <style>
-      body {
-        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: #020617;
-        color: #f8fafc;
-        margin: 0;
-        padding: 0;
-        -webkit-font-smoothing: antialiased;
-      }
-      h1, h2, h3, .manga-title {
-        font-family: 'Bangers', 'Outfit', sans-serif;
-        letter-spacing: 0.05em;
-      }
-      ::-webkit-scrollbar { width: 10px; }
-      ::-webkit-scrollbar-track { background: #090d16; }
-      ::-webkit-scrollbar-thumb { background: #facc15; border-radius: 5px; border: 2px solid #000; }
-    </style>
-  </head>
-  <body class="bg-slate-950 text-slate-100 min-h-screen">
-    <div id="root"></div>
-
-    <script type="text/babel">
-      const { useState, useEffect } = React;
-
-      // --- SVG ICONS ---
-      const IconSun = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>;
-      const IconBackpack = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M4 11h16v9a2 2 0 01-2 2H6a2 2 0 01-2-2v-9zM9 5a3 3 0 016 0v3H9V5z"/></svg>;
-      const IconMusic = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>;
-      const IconMoon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>;
-      const IconSparkles = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>;
-      const IconDroplets = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>;
-      const IconBookOpen = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>;
-      const IconShower = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v7a4 4 0 004 4h8a4 4 0 004-4V4M12 15v6m-4 0h8"/></svg>;
-      const IconSmile = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
-      const IconCheck = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>;
-      const IconLock = () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11V7a5 5 0 0110 0v4"/></svg>;
-      const IconClock = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2"/></svg>;
-      const IconFlame = () => <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.431.676-.653 1.458-.698 2.247a8.777 8.777 0 01-.137 1.157c-.126.745-.386 1.442-.767 2.054a6.002 6.002 0 01-1.396 1.472C6.388 10.74 6 11.83 6 13a6 6 0 1012 0c0-1.776-.713-3.38-1.874-4.542a10.978 10.978 0 00-3.731-5.905z" clipRule="evenodd"/></svg>;
-      const IconSend = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>;
-      const IconVolume2 = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/></svg>;
-      const IconVolumeX = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>;
-
-      // --- DATA & RULES ---
+  <script>
+    (function () {
       const DAD_PHONE = '919-961-8875';
       const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -89,10 +43,10 @@
           description: 'Brush teeth thoroughly for 2 minutes before heading out to school.',
           category: 'MORNING',
           xp: 100,
-          icon: IconSparkles,
           days: [0, 1, 2, 3, 4, 5, 6],
           timeWindow: 'Morning (Before School)',
-          ruleNote: 'Every morning'
+          ruleNote: 'Every morning',
+          iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>'
         },
         {
           id: 'water_bottle',
@@ -100,10 +54,10 @@
           description: 'Place your water bottle directly into the kitchen sink immediately upon arriving home.',
           category: 'AFTER_SCHOOL',
           xp: 150,
-          icon: IconDroplets,
           days: [1, 2, 3, 4, 5],
           timeWindow: 'After School',
-          ruleNote: 'Weekdays when returning from school'
+          ruleNote: 'Weekdays when returning from school',
+          iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>'
         },
         {
           id: 'homework_first',
@@ -111,11 +65,11 @@
           description: 'Finish ALL school homework before turning on screens, playing games, or using devices!',
           category: 'AFTER_SCHOOL',
           xp: 350,
-          icon: IconBookOpen,
           days: [1, 2, 3, 4, 5],
           timeWindow: 'After School / Cross Country',
           deviceWarning: true,
-          ruleNote: 'Weekdays after school/cross country (MUST finish before device time!)'
+          ruleNote: 'Weekdays after school/cross country (MUST finish before device time!)',
+          iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'
         },
         {
           id: 'tuba_practice',
@@ -123,10 +77,10 @@
           description: 'Practice tuba after dinner. MUST finish before Sullivan goes to sleep at 7:30 PM!',
           category: 'EVENING',
           xp: 300,
-          icon: IconMusic,
-          days: [1, 2, 4, 0], // Monday (1), Tuesday (2), Thursday (4), Sunday (0)
+          days: [1, 2, 4, 0],
           timeWindow: 'After Dinner (Deadline: 7:30 PM)',
-          ruleNote: 'Mondays, Tuesdays, Thursdays & Sundays'
+          ruleNote: 'Mondays, Tuesdays, Thursdays & Sundays',
+          iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>'
         },
         {
           id: 'bedtime_shower',
@@ -134,10 +88,10 @@
           description: 'Take a full shower and clean up before crawling into bed.',
           category: 'BEDTIME',
           xp: 150,
-          icon: IconShower,
           days: [0, 1, 2, 3, 4, 5, 6],
           timeWindow: 'Before Bed',
-          ruleNote: 'Every night before bed'
+          ruleNote: 'Every night before bed',
+          iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v7a4 4 0 004 4h8a4 4 0 004-4V4M12 15v6m-4 0h8"/></svg>'
         },
         {
           id: 'teeth_night',
@@ -145,20 +99,19 @@
           description: 'Brush teeth for 2 full minutes to protect against nighttime tooth bugs.',
           category: 'BEDTIME',
           xp: 100,
-          icon: IconSmile,
           days: [0, 1, 2, 3, 4, 5, 6],
           timeWindow: 'Before Bed',
-          ruleNote: 'Every night before bed'
+          ruleNote: 'Every night before bed',
+          iconSvg: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
         }
       ];
 
-      // --- WEB AUDIO CHIPTUNE SYNTH ---
-      function playAudioFx(type) {
+      // Web Audio SFX
+      function playAudio(type) {
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           if (!AudioCtx) return;
           const ctx = new AudioCtx();
-          
           if (type === 'check') {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -179,299 +132,270 @@
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
             osc.connect(gain); gain.connect(ctx.destination);
             osc.start(); osc.stop(ctx.currentTime + 0.12);
-          } else if (type === 'levelup') {
-            const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
-            notes.forEach((freq, idx) => {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              const startTime = ctx.currentTime + (idx * 0.07);
-              osc.type = 'square';
-              osc.frequency.setValueAtTime(freq, startTime);
-              gain.gain.setValueAtTime(0.15, startTime);
-              gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
-              osc.connect(gain); gain.connect(ctx.destination);
-              osc.start(startTime); osc.stop(startTime + 0.15);
-            });
           }
         } catch (e) {}
       }
 
+      // State Management
+      let state = {
+        xp: Number(localStorage.getItem('hudson_xp') || 0),
+        streak: Number(localStorage.getItem('hudson_streak') || 1),
+        completedMap: JSON.parse(localStorage.getItem('hudson_completed') || '{}'),
+        selectedDayIndex: new Date().getDay(),
+        soundEnabled: true,
+        showSmsModal: false
+      };
+
+      function saveState() {
+        localStorage.setItem('hudson_xp', state.xp);
+        localStorage.setItem('hudson_streak', state.streak);
+        localStorage.setItem('hudson_completed', JSON.stringify(state.completedMap));
+      }
+
+      function getTodayKey() {
+        return new Date().toISOString().split('T')[0];
+      }
+
       function calculateLevel(xp) {
         const level = Math.floor(xp / 500) + 1;
-        const currentLevelXp = xp % 500;
-        const progressPercent = Math.min(100, Math.round((currentLevelXp / 500) * 100));
+        const currentXp = xp % 500;
+        const percent = Math.min(100, Math.round((currentXp / 500) * 100));
         let title = '🌱 Rookie Hero';
         if (level >= 10) title = '⚡ Super Saiyan Son';
         else if (level >= 5) title = '🎷 Tuba Virtuoso';
         else if (level >= 3) title = '🎮 Device Unlocked Champion';
         else if (level >= 2) title = '⭐ Apprentice Adventurer';
-        return { level, currentLevelXp, progressPercent, title };
+        return { level, currentXp, percent, title };
       }
 
-      // --- MAIN COMPONENT ---
-      function App() {
-        const [xp, setXp] = useState(() => {
-          return Number(localStorage.getItem('hudson_xp') || 0);
-        });
-        const [streak, setStreak] = useState(() => {
-          return Number(localStorage.getItem('hudson_streak') || 1);
-        });
-        const [completedMap, setCompletedMap] = useState(() => {
-          try {
-            return JSON.parse(localStorage.getItem('hudson_completed') || '{}');
-          } catch(e) { return {}; }
-        });
-        const [selectedDayIndex, setSelectedDayIndex] = useState(new Date().getDay());
-        const [soundEnabled, setSoundEnabled] = useState(true);
-        const [showSmsModal, setShowSmsModal] = useState(false);
-        const [showLevelModal, setShowLevelModal] = useState(false);
-        const [timeLeft, setTimeLeft] = useState('');
+      function getTimeLeftString() {
+        const now = new Date();
+        const target = new Date();
+        target.setHours(19, 30, 0, 0);
+        const diff = target - now;
+        if (diff <= 0) return 'PASSED (Deadline was 7:30 PM)';
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        return `${h}h ${m}m ${s}s remaining`;
+      }
 
-        const todayKey = new Date().toISOString().split('T')[0];
-        const completedToday = completedMap[todayKey] || [];
-
-        // Save state
-        useEffect(() => {
-          localStorage.setItem('hudson_xp', xp);
-          localStorage.setItem('hudson_streak', streak);
-          localStorage.setItem('hudson_completed', JSON.stringify(completedMap));
-        }, [xp, streak, completedMap]);
-
-        // Countdown timer for 7:30 PM Tuba deadline
-        useEffect(() => {
-          function checkTimer() {
-            const now = new Date();
-            const target = new Date();
-            target.setHours(19, 30, 0, 0);
-            const diff = target - now;
-            if (diff <= 0) {
-              setTimeLeft('PASSED (Deadline was 7:30 PM)');
-            } else {
-              const h = Math.floor(diff / 3600000);
-              const m = Math.floor((diff % 3600000) / 60000);
-              const s = Math.floor((diff % 60000) / 1000);
-              setTimeLeft(`${h}h ${m}m ${s}s remaining`);
-            }
-          }
-          checkTimer();
-          const timer = setInterval(checkTimer, 1000);
-          return () => clearInterval(timer);
-        }, []);
-
-        const activeQuests = MASTER_QUESTS.filter(q => q.days.includes(selectedDayIndex));
-        const levelInfo = calculateLevel(xp);
-
-        const handleToggle = (quest) => {
-          const isDone = completedToday.includes(quest.id);
-          let newCompleted = [];
-          let newXp = xp;
-
-          if (isDone) {
-            newCompleted = completedToday.filter(id => id !== quest.id);
-            newXp = Math.max(0, xp - quest.xp);
-            if (soundEnabled) playAudioFx('uncheck');
-          } else {
-            newCompleted = [...completedToday, quest.id];
-            newXp = xp + quest.xp;
-            if (soundEnabled) playAudioFx('check');
-            if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
-
-            // Level up check
-            const oldLvl = calculateLevel(xp).level;
-            const newLvl = calculateLevel(newXp).level;
-            if (newLvl > oldLvl) {
-              if (soundEnabled) playAudioFx('levelup');
-              setShowLevelModal(true);
-            }
-          }
-
-          setXp(newXp);
-          setCompletedMap({ ...completedMap, [todayKey]: newCompleted });
-        };
-
+      function render() {
+        const root = document.getElementById('root');
+        const todayKey = getTodayKey();
+        const completedToday = state.completedMap[todayKey] || [];
+        const activeQuests = MASTER_QUESTS.filter(q => q.days.includes(state.selectedDayIndex));
+        const levelInfo = calculateLevel(state.xp);
         const completedCount = activeQuests.filter(q => completedToday.includes(q.id)).length;
         const totalCount = activeQuests.length;
         const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-        const smsText = `🎉 HUDSON QUEST UPDATE (${todayKey}):\nCompleted ${completedCount}/${totalCount} chores (${percent}%)\nStreak: ${streak} Days 🔥\nTarget Phone: ${DAD_PHONE}`;
-        const smsUrl = `sms:9199618875?body=${encodeURIComponent(smsText)}`;
+        const smsMessage = `🎉 HUDSON QUEST UPDATE (${todayKey}):\nCompleted ${completedCount}/${totalCount} chores (${percent}%)\nStreak: ${state.streak} Days 🔥\nTarget Phone: ${DAD_PHONE}`;
+        const smsUrl = `sms:${DAD_PHONE.replace(/[^0-9]/g, '')}?body=${encodeURIComponent(smsMessage)}`;
 
-        return (
-          <div className="max-w-4xl mx-auto p-4 sm:p-8">
+        root.innerHTML = `
+          <div class="max-w-4xl mx-auto p-4 sm:p-8">
             
-            {/* MANGA HUD HEADER */}
-            <header className="relative bg-slate-900 border-4 border-yellow-400 rounded-2xl p-6 shadow-[8px_8px_0px_0px_rgba(250,204,21,1)] mb-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <!-- HEADER HUD -->
+            <header class="relative bg-slate-900 border-4 border-yellow-400 rounded-2xl p-6 shadow-[8px_8px_0px_0px_rgba(250,204,21,1)] mb-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem;">
                 
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-yellow-500 via-amber-400 to-red-500 border-4 border-black flex items-center justify-center text-4xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                  <div style="width: 5rem; height: 5rem; border-radius: 1rem; background: linear-gradient(to top right, #eab308, #f59e0b, #ef4444); border: 4px solid #000; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative;">
                     🥷
-                    <div className="absolute -bottom-2 -right-2 bg-yellow-400 text-black font-black text-xs px-2 py-0.5 rounded-full border-2 border-black">
-                      LVL {levelInfo.level}
+                    <div style="position: absolute; bottom: -0.5rem; right: -0.5rem; background: #facc15; color: #000; font-weight: 900; font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 9999px; border: 2px solid #000;">
+                      LVL ${levelInfo.level}
                     </div>
                   </div>
 
                   <div>
-                    <h1 className="text-3xl font-black text-yellow-400 tracking-wider uppercase">
+                    <h1 class="text-3xl font-black text-yellow-400 tracking-wider uppercase">
                       HUDSON'S QUEST LOG
                     </h1>
-                    <p className="text-amber-300 font-bold text-sm">
-                      Rank: <span className="text-white underline decoration-yellow-400">{levelInfo.title}</span>
+                    <p class="text-amber-300 font-bold text-sm">
+                      Rank: <span class="text-white underline decoration-yellow-400">${levelInfo.title}</span>
                     </p>
-                    <div className="mt-1 flex items-center gap-1 bg-red-950/80 border border-red-500 text-red-300 px-2.5 py-0.5 rounded-lg text-xs font-black w-fit">
-                      <IconFlame /> STREAK: {streak} DAYS
+                    <div class="mt-1 flex items-center gap-1 bg-red-950 border border-red-500 text-red-300 px-2.5 py-0.5 rounded-lg text-xs font-black w-fit">
+                      🔥 STREAK: ${state.streak} DAYS
                     </div>
                   </div>
                 </div>
 
-                {/* XP BAR */}
-                <div className="w-full md:w-1/3 bg-slate-950 p-3 rounded-xl border-2 border-yellow-500/50">
-                  <div className="flex justify-between items-center text-xs font-black mb-1">
-                    <span className="text-yellow-400">⚡ XP PROGRESS</span>
-                    <span className="text-slate-300">{levelInfo.currentLevelXp} / 500 XP</span>
+                <!-- XP PROGRESS BAR -->
+                <div style="flex: 1; min-width: 250px; background: #020617; padding: 0.75rem; border-radius: 0.75rem; border: 2px solid rgba(245, 158, 11, 0.5);">
+                  <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                    <span style="color: #facc15;">⚡ XP PROGRESS</span>
+                    <span style="color: #cbd5e1;">${levelInfo.currentXp} / 500 XP</span>
                   </div>
-                  <div className="w-full h-4 bg-slate-800 rounded-full border border-black overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500" style={{ width: `${levelInfo.progressPercent}%` }} />
+                  <div style="width: 100%; height: 1rem; background: #1e293b; border-radius: 9999px; border: 1px solid #000; overflow: hidden;">
+                    <div style="height: 100%; background: linear-gradient(to right, #f59e0b, #facc15); width: ${levelInfo.percent}%; transition: width 0.5s;"></div>
                   </div>
                 </div>
 
-                {/* CONTROLS & DAY SIMULATOR */}
-                <div className="flex items-center gap-2">
-                  <div className="bg-slate-950 px-3 py-2 rounded-xl border border-yellow-500/40 text-xs font-bold text-yellow-300">
-                    <select 
-                      value={selectedDayIndex} 
-                      onChange={(e) => setSelectedDayIndex(Number(e.target.value))}
-                      className="bg-transparent text-yellow-300 font-bold focus:outline-none cursor-pointer"
-                    >
-                      {DAYS_OF_WEEK.map((name, i) => (
-                        <option key={name} value={i} className="bg-slate-900 text-white">
-                          {name} {i === new Date().getDay() ? '(Today)' : ''}
+                <!-- CONTROLS & DAY SIMULATOR -->
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <div class="bg-slate-950 px-3 py-2 rounded-xl border border-yellow-500/40 text-xs font-bold text-yellow-300">
+                    <select id="daySelect" class="bg-transparent text-yellow-300 font-bold focus:outline-none cursor-pointer">
+                      ${DAYS_OF_WEEK.map((name, i) => `
+                        <option value="${i}" ${i === state.selectedDayIndex ? 'selected' : ''} class="bg-slate-900 text-white">
+                          ${name} ${i === new Date().getDay() ? '(Today)' : ''}
                         </option>
-                      ))}
+                      `).join('')}
                     </select>
                   </div>
 
-                  <button 
-                    onClick={() => setSoundEnabled(!soundEnabled)} 
-                    className="p-2.5 bg-slate-800 border-2 border-yellow-400 text-yellow-400 rounded-xl font-bold"
-                  >
-                    {soundEnabled ? <IconVolume2 /> : <IconVolumeX />}
+                  <button id="soundBtn" class="p-2.5 bg-slate-800 border-2 border-yellow-400 text-yellow-400 rounded-xl font-bold">
+                    ${state.soundEnabled ? '🔊' : '🔇'}
                   </button>
 
-                  <button 
-                    onClick={() => setShowSmsModal(true)}
-                    className="flex items-center gap-1 px-3.5 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 text-white font-black text-xs rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  >
-                    <IconSend /> NOTIFY DAD
+                  <button id="smsModalBtn" class="px-3.5 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 text-white font-black text-xs rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    📱 NOTIFY DAD (SMS)
                   </button>
                 </div>
 
               </div>
             </header>
 
-            {/* PROGRESS SUMMARY */}
-            <div className="bg-slate-900 border-4 border-yellow-400 p-5 rounded-2xl shadow-[6px_6px_0px_0px_rgba(250,204,21,1)] mb-8">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-xl font-black text-white uppercase">TODAY'S MISSION DIRECTIVE</h2>
-                <span className="bg-yellow-400 text-black px-3 py-1 rounded-full font-black text-xs border border-black">
-                  {completedCount} / {totalCount} QUESTS CLEAR ({percent}%)
+            <!-- MISSION PROGRESS BANNER -->
+            <div class="bg-slate-900 border-4 border-yellow-400 p-5 rounded-2xl shadow-[6px_6px_0px_0px_rgba(250,204,21,1)] mb-8">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h2 class="text-xl font-black text-white uppercase">TODAY'S MISSION DIRECTIVE</h2>
+                <span class="bg-yellow-400 text-black px-3 py-1 rounded-full font-black text-xs border border-black">
+                  ${completedCount} / ${totalCount} QUESTS CLEAR (${percent}%)
                 </span>
               </div>
-              <div className="w-full h-4 bg-slate-950 rounded-full border border-black overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style={{ width: `${percent}%` }} />
+              <div style="width: 100%; height: 1rem; background: #020617; border-radius: 9999px; border: 1px solid #000; overflow: hidden;">
+                <div style="height: 100%; background: linear-gradient(to right, #10b981, #2dd4bf); width: ${percent}%; transition: width 0.5s;"></div>
               </div>
             </div>
 
-            {/* QUEST CARDS */}
-            <div className="space-y-4">
-              {activeQuests.map((quest) => {
+            <!-- QUEST LIST CARDS -->
+            <div class="space-y-4">
+              ${activeQuests.map(quest => {
                 const isDone = completedToday.includes(quest.id);
-                const IconComp = quest.icon;
-
-                return (
-                  <div 
-                    key={quest.id}
-                    className={`p-5 rounded-2xl border-4 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                      isDone 
-                        ? 'bg-slate-900/90 border-emerald-400 shadow-[4px_4px_0px_0px_rgba(16,185,129,1)]' 
-                        : 'bg-slate-900 border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <div className={`p-3 rounded-xl border-2 border-black ${isDone ? 'bg-emerald-400 text-black' : 'bg-yellow-400 text-black'}`}>
-                        <IconComp />
+                return `
+                  <div class="p-5 rounded-2xl border-4 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isDone ? 'bg-slate-900/90 border-emerald-400 shadow-[4px_4px_0px_0px_rgba(16,185,129,1)]' : 'bg-slate-900 border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'}">
+                    <div style="display: flex; align-items: flex-start; gap: 0.875rem;">
+                      <div class="p-3 rounded-xl border-2 border-black ${isDone ? 'bg-emerald-400 text-black' : 'bg-yellow-400 text-black'}">
+                        ${quest.iconSvg}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className={`text-lg font-black uppercase ${isDone ? 'text-emerald-400 line-through' : 'text-white'}`}>
-                            {quest.title}
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                          <h3 class="text-lg font-black uppercase ${isDone ? 'text-emerald-400 line-through' : 'text-white'}">
+                            ${quest.title}
                           </h3>
-                          <span className="bg-yellow-400 text-black font-black text-xs px-2 py-0.5 rounded-full border border-black">
-                            +{quest.xp} XP
+                          <span class="bg-yellow-400 text-black font-black text-xs px-2 py-0.5 rounded-full border border-black">
+                            +${quest.xp} XP
                           </span>
-                          {quest.deviceWarning && (
-                            <span className="bg-red-600 text-white font-black text-xs px-2 py-0.5 rounded-full border border-black flex items-center gap-1">
-                              <IconLock /> NO DEVICES UNTIL DONE!
+                          ${quest.deviceWarning ? `
+                            <span class="bg-red-600 text-white font-black text-xs px-2 py-0.5 rounded-full border border-black">
+                              🔒 NO DEVICES UNTIL DONE!
                             </span>
-                          )}
+                          ` : ''}
                         </div>
-                        <p className="text-slate-300 text-xs mt-1">{quest.description}</p>
-                        
-                        {quest.id === 'tuba_practice' && (
-                          <div className="mt-2 text-xs font-black text-amber-400 flex items-center gap-1 bg-slate-950 p-2 rounded-lg border border-yellow-500/40">
-                            <IconClock /> Sullivan Bedtime Deadline (7:30 PM): <span className="text-white underline">{timeLeft}</span>
+                        <p class="text-slate-300 text-xs mt-1">${quest.description}</p>
+                        ${quest.id === 'tuba_practice' ? `
+                          <div class="mt-2 text-xs font-black text-amber-400 bg-slate-950 p-2 rounded-lg border border-yellow-500/40">
+                            ⏰ Sullivan Bedtime Deadline (7:30 PM): <span class="text-white underline">${getTimeLeftString()}</span>
                           </div>
-                        )}
+                        ` : ''}
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleToggle(quest)}
-                      className={`px-5 py-3 rounded-xl font-black text-xs border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 ${
-                        isDone ? 'bg-emerald-500 text-black' : 'bg-yellow-400 text-black hover:bg-yellow-300'
-                      }`}
-                    >
-                      {isDone ? <><IconCheck /> COMPLETED</> : `CHECK OFF (+${quest.xp} XP)`}
+                    <button data-quest="${quest.id}" data-xp="${quest.xp}" class="toggleBtn px-5 py-3 rounded-xl font-black text-xs border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] ${isDone ? 'bg-emerald-500 text-black' : 'bg-yellow-400 text-black hover:bg-yellow-300'}">
+                      ${isDone ? '✅ COMPLETED' : `CHECK OFF (+${quest.xp} XP)`}
                     </button>
                   </div>
-                );
-              })}
+                `;
+              }).join('')}
             </div>
 
-            {/* SMS NOTIFY MODAL */}
-            {showSmsModal && (
-              <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-                <div className="bg-slate-900 border-4 border-yellow-400 rounded-2xl max-w-md w-full p-6 text-center space-y-4">
-                  <h3 className="text-2xl font-black text-yellow-400">NOTIFY DAD (SMS ALERT)</h3>
-                  <p className="text-xs text-slate-300">Target Phone: <strong className="text-yellow-400">{DAD_PHONE}</strong></p>
-                  <pre className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-left text-slate-200 font-mono whitespace-pre-wrap">{smsText}</pre>
-                  <a href={smsUrl} onClick={() => setShowSmsModal(false)} className="block w-full py-3 bg-emerald-500 text-black font-black rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-                    OPEN MESSAGES APP & SEND TO DAD
+            <!-- SMS MODAL -->
+            ${state.showSmsModal ? `
+              <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 50;">
+                <div class="bg-slate-900 border-4 border-yellow-400 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-[10px_10px_0px_0px_rgba(250,204,21,1)]">
+                  <h3 class="text-2xl font-black text-yellow-400">NOTIFY DAD (SMS ALERT)</h3>
+                  <p class="text-xs text-slate-300">Target Phone: <strong class="text-yellow-400">${DAD_PHONE}</strong></p>
+                  <pre class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-left text-slate-200 font-mono whitespace-pre-wrap">${smsMessage}</pre>
+                  <a href="${smsUrl}" id="closeSmsLink" class="block w-full py-3 bg-emerald-500 text-black font-black rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    📱 OPEN MESSAGES APP & SEND TO DAD
                   </a>
-                  <button onClick={() => setShowSmsModal(false)} className="text-xs text-slate-400 underline">Close</button>
+                  <button id="closeSmsBtn" class="text-xs text-slate-400 underline">Close Modal</button>
                 </div>
               </div>
-            )}
-
-            {/* LEVEL UP MODAL */}
-            {showLevelModal && (
-              <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50">
-                <div className="bg-slate-900 border-8 border-yellow-400 rounded-3xl max-w-md w-full p-8 text-center space-y-4">
-                  <h2 className="text-4xl font-black text-yellow-400 tracking-widest">LEVEL UP!</h2>
-                  <p className="text-xl font-bold text-white">HUDSON REACHED LEVEL {levelInfo.level}</p>
-                  <p className="text-sm font-bold text-emerald-400">Title: {levelInfo.title}</p>
-                  <button onClick={() => setShowLevelModal(false)} className="w-full py-3 bg-yellow-400 text-black font-black text-lg rounded-xl border-2 border-black">
-                    KEEP CRUSHING QUESTS!
-                  </button>
-                </div>
-              </div>
-            )}
+            ` : ''}
 
           </div>
-        );
+        `;
+
+        // Attach Event Listeners
+        const daySelect = document.getElementById('daySelect');
+        if (daySelect) {
+          daySelect.addEventListener('change', (e) => {
+            state.selectedDayIndex = Number(e.target.value);
+            render();
+          });
+        }
+
+        const soundBtn = document.getElementById('soundBtn');
+        if (soundBtn) {
+          soundBtn.addEventListener('click', () => {
+            state.soundEnabled = !state.soundEnabled;
+            render();
+          });
+        }
+
+        const smsModalBtn = document.getElementById('smsModalBtn');
+        if (smsModalBtn) {
+          smsModalBtn.addEventListener('click', () => {
+            state.showSmsModal = true;
+            render();
+          });
+        }
+
+        const closeSmsBtn = document.getElementById('closeSmsBtn');
+        if (closeSmsBtn) {
+          closeSmsBtn.addEventListener('click', () => {
+            state.showSmsModal = false;
+            render();
+          });
+        }
+
+        const closeSmsLink = document.getElementById('closeSmsLink');
+        if (closeSmsLink) {
+          closeSmsLink.addEventListener('click', () => {
+            state.showSmsModal = false;
+            render();
+          });
+        }
+
+        document.querySelectorAll('.toggleBtn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const qId = e.currentTarget.getAttribute('data-quest');
+            const qXp = Number(e.currentTarget.getAttribute('data-xp'));
+            const isDone = completedToday.includes(qId);
+
+            if (isDone) {
+              state.completedMap[todayKey] = completedToday.filter(id => id !== qId);
+              state.xp = Math.max(0, state.xp - qXp);
+              if (state.soundEnabled) playAudio('uncheck');
+            } else {
+              state.completedMap[todayKey] = [...completedToday, qId];
+              state.xp += qXp;
+              if (state.soundEnabled) playAudio('check');
+              if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+            }
+
+            saveState();
+            render();
+          });
+        });
       }
 
-      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
-  </body>
+      // Initial Render & Timer Interval
+      render();
+      setInterval(render, 1000);
+    })();
+  </script>
+</body>
 </html>
